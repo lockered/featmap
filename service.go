@@ -115,6 +115,7 @@ type Service interface {
 	RenameWorkflow(id string, title string) (*Workflow, error)
 	DeleteWorkflow(id string) error
 	UpdateWorkflowDescription(id string, d string) (*Workflow, error)
+	UpdateWorkflowTicketnumber(id string, t string) (*Workflow, error)
 	ChangeColorOnWorkflow(id string, color string) (*Workflow, error)
 	CloseWorkflow(id string) (*Workflow, error)
 	OpenWorkflow(id string) (*Workflow, error)
@@ -157,6 +158,8 @@ type Service interface {
 	CreatePersonaWithID(id string, projectID string, avatar string, name string, role string, description string, workflowID string, workflowPersonaID string) (*Persona, error)
 	DeletePersona(id string) error
 	UpdatePersona(id string, avatar string, name string, role string, description string) (*Persona, error)
+
+	KanbanService
 }
 
 type service struct {
@@ -264,19 +267,19 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	sub := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
-		Level:              "TRIAL",
+		Level:              "PRO",
 		NumberOfEditors:    100,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 15),
+		ExpirationDate:     t.AddDate(1000, 0, 0),
 		CreatedByName:      acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: acc.Name,
-		Status:             "trialing",
+		Status:             "active",
 	}
 
 	if s.config.Mode != "hosted" {
-		sub.Level = "BASIC"
+		sub.Level = "PRO"
 		sub.NumberOfEditors = 1000
 		sub.ExpirationDate = t.AddDate(1000, 0, 0)
 		sub.Status = "active"
@@ -411,15 +414,15 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
-		Level:              "TRIAL",
+		Level:              "PRO",
 		NumberOfEditors:    100,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 15),
+		ExpirationDate:     t.AddDate(1000, 0, 0),
 		CreatedByName:      s.Acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
-		Status:             "trialing",
+		Status:             "active",
 	}
 	member := &Member{
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
@@ -1304,6 +1307,20 @@ func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, err
 	}
 
 	x.Description = d
+	x.LastModified = time.Now().UTC()
+	x.LastModifiedByName = s.Acc.Name
+	s.r.StoreWorkflow(x)
+
+	return x, nil
+}
+
+func (s *service) UpdateWorkflowTicketnumber(id string, t string) (*Workflow, error) {
+	x, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	x.Ticketnumber = t
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	s.r.StoreWorkflow(x)

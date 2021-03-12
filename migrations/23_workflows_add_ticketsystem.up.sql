@@ -1,0 +1,1 @@
+ALTER TABLE public.workflows ADD ticketnumber varchar NOT NULL DEFAULT '';

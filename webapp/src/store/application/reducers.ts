@@ -12,6 +12,7 @@ export const applicationInitialState: State = {
         memberships: [],
         messages: [],
         subscriptions: [],
+        zillaBaseLink: ""
     }
 }
 

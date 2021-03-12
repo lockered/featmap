@@ -4,6 +4,7 @@ import { IFeature } from "../store/features/types";
 import { IWorkflow } from "../store/workflows/types";
 import { IProject } from "../store/projects/types";
 import { Color } from "./misc";
+import { IKanbanBoard } from "../store/kanbanboard/types";
 
 export interface ICard {
     workspaceId: string
@@ -20,4 +21,4 @@ export interface ICard {
     annotations: string
 }
 
-export type EntityTypes = IMilestone | ISubWorkflow | IFeature | IWorkflow | IProject
+export type EntityTypes = IMilestone | ISubWorkflow | IFeature | IWorkflow | IProject | IKanbanBoard 

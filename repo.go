@@ -94,6 +94,8 @@ type Repository interface {
 	FindWorkflowPersonasByProject(workspaceID string, projectID string) ([]*WorkflowPersona, error)
 	StoreWorkflowPersona(x *WorkflowPersona)
 	DeleteWorkflowPersona(workspaceID string, id string)
+
+	KanbanRepository
 }
 
 type repo struct {
@@ -446,7 +448,7 @@ func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*
 }
 
 func (a *repo) StoreWorkflow(x *Workflow) {
-	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status,annotations) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12, annotations = $13", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status, x.Annotations)
+	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status,annotations,ticketnumber) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12, annotations = $13, ticketnumber = $14", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status, x.Annotations, x.Ticketnumber)
 }
 
 func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) {

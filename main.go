@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,6 +19,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/docgen"
 	"github.com/go-chi/jwtauth"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -42,9 +44,14 @@ type Configuration struct {
 	StripeWebhookSecret string `json:"stripeWebhookSecret"`
 	StripeBasicPlan     string `json:"stripeBasicPlan"`
 	StripeProPlan       string `json:"stripeProPlan"`
+	ZillaBaseLink       string `json:"zillaBaseLink"`
 }
 
+var routes = flag.Bool("routes", false, "Generate router documentation")
+
 func main() {
+	flag.Parse()
+
 	r := chi.NewRouter()
 
 	// A good base middleware stack
@@ -123,6 +130,7 @@ func main() {
 
 	r.Route("/v1/account", accountAPI) // Account needed
 	r.Route("/v1/", workspaceAPI)      // Account + workspace is needed
+	r.Route("/v1/kanban", kanbanAPI)   // Account + workspace is needed
 
 	files := &assetfs.AssetFS{
 		Asset:    webapp.Asset,
@@ -136,6 +144,18 @@ func main() {
 		index, _ := webapp.Asset("webapp/build/index.html")
 		http.ServeContent(w, r, "index.html", time.Now(), strings.NewReader(string(index)))
 	})
+
+	// Passing -routes to the program will generate docs for the above
+	// router definition. See the `routes.json` file in this folder for
+	// the output.
+	if *routes {
+		// fmt.Println(docgen.JSONRoutesDoc(r))
+		fmt.Println(docgen.MarkdownRoutesDoc(r, docgen.MarkdownOpts{
+			ProjectPath: "github.com/go-chi/chi/v5",
+			Intro:       "Welcome to the chi/_examples/rest generated docs.",
+		}))
+		return
+	}
 
 	fmt.Println("Serving on port " + config.Port)
 	err = http.ListenAndServe(":"+config.Port, r)

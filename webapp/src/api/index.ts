@@ -8,6 +8,8 @@ import { Color } from '../core/misc';
 import { IFeatureComment } from '../store/featurecomments/types';
 import { IPersona } from '../store/personas/types';
 import { IWorkflowPersona } from '../store/workflowpersonas/types';
+import { IKanbanBoard } from '../store/kanbanboard/types';
+import { ISwimlane } from '../store/swimlane/types';
 
 const endpoint = process.env.REACT_APP_API_ENDPOINT ? process.env.REACT_APP_API_ENDPOINT : "/v1"
 
@@ -206,6 +208,7 @@ export interface API_FETCH_APP_RESP {
     account: IAccount
     messages: IMessage[]
     subscriptions: ISubscription[]
+    zillaBaseLink: string
 }
 
 export const API_FETCH_APP = async () => {
@@ -809,6 +812,19 @@ export const API_UPDATE_WORKFLOW_DESCRIPTION = async (workspaceId: string, id: s
     });
 }
 
+export const API_UPDATE_WORKFLOW_TICKETNUMBER = async (workspaceId: string, id: string, ticketnumber: string) => {
+    return await fetch(endpoint + "/workflows/" + id + "/ticketnumber", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ ticketnumber })
+    });
+}
+
 export const API_CHANGE_WORKFLOW_COLOR = async (workspaceId: string, id: string, color: Color) => {
     return await fetch(endpoint + "/workflows/" + id + "/color", {
         method: 'POST',
@@ -1093,5 +1109,65 @@ export const API_UPDATE_PERSONA = async (workspaceId: string, id: string, avatar
         },
         credentials: 'include',
         body: JSON.stringify({ avatar, name, role, description })
+    })
+}
+
+export interface API_GET_KANBANBOARDS_RESP {
+    kanbanboards: IKanbanBoard[]
+}
+
+
+export const API_GET_KANBANBOARDS = async (workspaceId: string) => {
+    return await fetch(endpoint + "/kanban" , {
+        method: 'GET',
+        headers: {
+            "Workspace": workspaceId
+        },
+            credentials: 'include',
+    });
+}
+
+export interface API_GET_KANBANBOARD_RESP {
+    kanbanboard: IKanbanBoard
+    swimlanes: ISwimlane[]
+//    featureComments: IFeatureComment[]
+}
+
+export const API_GET_KANBANBOARD = async (workspaceId: string, boardId: string) => {
+    return await fetch(endpoint + "/kanban/" + boardId, {
+        method: 'GET',
+        headers: {
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+    });
+}
+
+
+export const API_CREATE_KANBANBOARD = async (workspaceId: string, boardId: string, title: string) => {
+    return await fetch(endpoint + "/kanban/" + boardId, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId,
+            "KanbanBoard": boardId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ title })
+    });
+}
+
+export const API_CREATE_SWIMLANE = async (workspaceId: string, boardId: string, title: string) => {
+    return await fetch(endpoint + "/kanban/" + boardId +"/swimlane", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId,
+            "KanbanBoard": boardId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ title })
     })
 }

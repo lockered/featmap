@@ -123,6 +123,7 @@ func workspaceAPI(r chi.Router) {
 					r.Post("/rename", renameWorkflow)
 					r.Post("/move", moveWorkflow)
 					r.Post("/description", updateWorkflowDescription)
+					r.Post("/ticketnumber", updateWorkflowTicketnumber)
 					r.Post("/color", changeColorOnWorkflow)
 					r.Post("/open", openWorkflow)
 					r.Post("/close", closeWorkflow)
@@ -688,6 +689,23 @@ func updateWorkflowDescription(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, m)
 }
 
+func updateWorkflowTicketnumber(w http.ResponseWriter, r *http.Request) {
+	data := &updateTicketnumberRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.UpdateWorkflowTicketnumber(id, data.Ticketnumber)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
+
+}
+
 func changeColorOnWorkflow(w http.ResponseWriter, r *http.Request) {
 	data := &changeColorRequest{}
 	if err := render.Bind(r, data); err != nil {
@@ -1239,6 +1257,14 @@ type updateDescriptionRequest struct {
 }
 
 func (p *updateDescriptionRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+type updateTicketnumberRequest struct {
+	Ticketnumber string `json:"ticketnumber"`
+}
+
+func (p *updateTicketnumberRequest) Bind(r *http.Request) error {
 	return nil
 }
 

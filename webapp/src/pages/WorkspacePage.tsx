@@ -5,30 +5,37 @@ import { getWorkspaceByName, application, getSubscription } from '../store/appli
 import { connect } from 'react-redux'
 import NotFound from './NotFound';
 import ProjectPage from './ProjectPage';
+import KanbanBoardPage from './KanbanBoardPage';
 import Header from '../components/Header';
 import { IApplication } from '../store/application/types';
 import { loadProjects } from '../store/projects/actions';
 import { projects } from '../store/projects/selectors';
 import { IProject } from '../store/projects/types';
+import { IKanbanBoard } from '../store/kanbanboard/types'
 import { Route, Switch, Redirect, Link } from 'react-router-dom'
 import ProjectsPage from './ProjectsPage';
-import { API_GET_PROJECTS } from '../api'
+import { API_GET_KANBANBOARDS, API_GET_PROJECTS } from '../api'
 import WorkspaceSettingsPage from './WorkspaceSettingsPage';
 import { daysBetween, subIsInactive, subIsTrial } from '../core/misc';
 import SubscriptionPage from './SubscriptionPage';
+import { kanbanBoards } from '../store/kanbanboard/selectors';
+import { loadKanbanBoards } from '../store/kanbanboard/actions';
 
 const mapStateToProps = (state: AppState) => ({
     application: application(state),
-    projects: projects(state)
+    projects: projects(state),
+    kanbanBoards: kanbanBoards(state)
 })
 
 const mapDispatchToProps = {
-    loadProjects: loadProjects
+    loadProjects: loadProjects,
+    loadKanbanBoards: loadKanbanBoards
 }
 
 interface PropsFromState {
     application: IApplication
     projects: IProject[]
+    kanbanboards: IKanbanBoard[]
 }
 interface RouterProps extends RouteComponentProps<{
     workspaceName: string
@@ -36,12 +43,14 @@ interface RouterProps extends RouteComponentProps<{
 interface PropsFromDispatch {
     //loadProjectsRequest: typeof loadProjectsRequest
     loadProjects: typeof loadProjects
+    loadKanbanBoards: typeof loadKanbanBoards
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
 
 interface State {
-    loading: boolean
+    loadingProjects: boolean
+    loadingBoards: boolean
     notFound: boolean
 }
 
@@ -50,7 +59,8 @@ class WorkspacePage extends Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
-            loading: true,
+            loadingProjects: true,
+            loadingBoards: true,
             notFound: false
         }
     }
@@ -67,11 +77,21 @@ class WorkspacePage extends Component<Props, State> {
                     if (response.ok) {
                         response.json().then((data: IProject[]) => {
                             this.props.loadProjects(data)
-                            this.setState({ loading: false })
+                            this.setState({ loadingProjects: false })
                         })
                     }
                 }
                 )
+            API_GET_KANBANBOARDS(ws.id)
+                .then(response => {
+                    if (response.ok) {
+                        response.json().then((data: IKanbanBoard[]) => {
+                            this.props.loadKanbanBoards(data)
+                            this.setState({ loadingBoards: false })
+                        })
+                    }
+
+                })
 
         }
     }
@@ -85,7 +105,7 @@ class WorkspacePage extends Component<Props, State> {
             this.state.notFound ?
                 <div><Redirect to="/" /></div>
                 :
-                this.state.loading ?
+                (this.state.loadingProjects || this.state.loadingBoards) ?
                     <div className="p-2">Loading data...</div>
                     :
                     (
@@ -100,6 +120,7 @@ class WorkspacePage extends Component<Props, State> {
                                     <Route exact strict path={this.props.match.path + "/settings"} component={WorkspaceSettingsPage} />
                                     <Route exact strict path={this.props.match.path + "/subscription"} component={SubscriptionPage} />
                                     <Route strict path={this.props.match.path + "/projects/:projectId"} component={ProjectPage} />
+                                    <Route strict path={this.props.match.path + "/kanban/:boardId"} component={KanbanBoardPage} />
                                     <Route path={this.props.match.path} component={NotFound} />
                                 </Switch>
                             </div>

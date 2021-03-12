@@ -118,6 +118,7 @@ type Workflow struct {
 	Color              string    `db:"color" json:"color"`
 	Status             string    `db:"status" json:"status"`
 	Annotations        string    `db:"annotations" json:"annotations"`
+	Ticketnumber       string    `db:"ticketnumber" json:"ticketnumber"`
 }
 
 // SubWorkflow ...

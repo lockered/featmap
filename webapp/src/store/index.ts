@@ -7,6 +7,8 @@ import * as fromMilestones from './milestones/reducers'
 import * as fromApplication from './application/reducers'
 import * as fromPersonas from './personas/reducers'
 import * as fromWorkflowPersonas from './workflowpersonas/reducers'
+import * as fromKanbanBoards from './kanbanboard/reducers'
+import * as fromSwimlanes from './swimlane/reducers'
 
 import { combineReducers } from 'redux';
 import { RouterState, connectRouter } from 'connected-react-router'
@@ -19,6 +21,7 @@ import { Actions as ProjectsActions } from "./projects/actions"
 import { Actions as WorkflowsActions } from "./workflows/actions"
 import { Actions as SubworkflowsActions } from "./workflows/actions"
 import { Actions as PersonaActions } from "./personas/actions"
+import { Actions as KanbanBoardAction } from "./kanbanboard/actions"
 
 
 export interface AppState {
@@ -32,6 +35,8 @@ export interface AppState {
     router: RouterState
     personas: fromPersonas.State
     workflowPersonas: fromWorkflowPersonas.State
+    kanbanBoards: fromKanbanBoards.State
+    swimlanes: fromSwimlanes.State
 }
 
 export const reducer = (history: History) => combineReducers<AppState>({
@@ -44,7 +49,10 @@ export const reducer = (history: History) => combineReducers<AppState>({
     application: fromApplication.reducer,
     personas: fromPersonas.reducer,
     workflowPersonas: fromWorkflowPersonas.reducer,
+    kanbanBoards: fromKanbanBoards.reducer,
+    swimlanes: fromSwimlanes.reducer,
     router: connectRouter(history)
+    
 })
 
-export type AllActions = ApplicationActions | FeaturesActions | MilestonesActions | ProjectsActions | WorkflowsActions | SubworkflowsActions | PersonaActions
+export type AllActions = ApplicationActions | FeaturesActions | MilestonesActions | ProjectsActions | WorkflowsActions | SubworkflowsActions | PersonaActions | KanbanBoardAction

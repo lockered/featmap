@@ -7,14 +7,18 @@ import { connect } from 'react-redux'
 import { IApplication } from '../store/application/types';
 import { projects } from '../store/projects/selectors';
 import { IProject } from '../store/projects/types';
+import { kanbanBoards } from '../store/kanbanboard/selectors'
+import { IKanbanBoard } from '../store/kanbanboard/types';
 import { Link } from 'react-router-dom';
 import CreateProjectModal from '../components/CreateProjectModal'
+import CreateBoardModal from '../components/CreateBoardModal'
 import TimeAgo from 'react-timeago'
 import { isEditor, subIsInactive } from '../core/misc';
 
 const mapStateToProps = (state: AppState) => ({
     application: application(state),
-    projects: projects(state)
+    projects: projects(state),
+    kanbanBoards: kanbanBoards(state),
 })
 
 const mapDispatchToProps = {}
@@ -22,6 +26,7 @@ const mapDispatchToProps = {}
 interface PropsFromState {
     application: IApplication
     projects: IProject[]
+    kanbanBoards: IKanbanBoard[]
 }
 interface RouterProps extends RouteComponentProps<{
     workspaceName: string
@@ -35,6 +40,7 @@ type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
 interface State {
     show: boolean
     showAddProjectModal: boolean
+    showAddBoardModal: boolean
 }
 
 class WorkspacePage extends Component<Props, State> {
@@ -43,7 +49,8 @@ class WorkspacePage extends Component<Props, State> {
         super(props)
         this.state = {
             show: false,
-            showAddProjectModal: false
+            showAddProjectModal: false,
+            showAddBoardModal: false
         }
     }
 
@@ -60,6 +67,21 @@ class WorkspacePage extends Component<Props, State> {
 
         }))
     }
+
+    openBoardModal = () => {
+        this.setState(state => ({
+            showAddBoardModal: true
+
+        }))
+    }
+
+    closeBoardModal = () => {
+        this.setState(state => ({
+            showAddBoardModal: false
+
+        }))
+    }
+
 
     render() {
         const { workspaceName } = this.props.match.params
@@ -78,14 +100,19 @@ class WorkspacePage extends Component<Props, State> {
                     : null
                 }
 
-                <div className="  ">
-                    <div className="p-2 flex flex-row mb-2 items-center">
-                        <div ><h3>Projects</h3></div>
-                        {!viewOnly && <div className="ml-2"> <Button title="New project" primary icon="add" handleOnClick={() => this.openProjectModal()} />
-                        </div>}
+                {this.state.showAddBoardModal ?
+                    <CreateBoardModal workspaceName={workspaceName} close={this.closeBoardModal} />
+                    : null
+                }
 
-                    </div>
-                    <div>
+                <div className="  ">
+                        <div className="p-2 flex flex-row mb-2 items-center">
+                            <div ><h3>Projects</h3></div>
+                            {!viewOnly && <div className="ml-2"> <Button title="New project" primary icon="add" handleOnClick={() => this.openProjectModal()} />
+                            </div>}
+
+                        </div>
+                     <div>
 
                     </div>
                     <CardLayout>
@@ -115,6 +142,38 @@ class WorkspacePage extends Component<Props, State> {
                             }
                         </div>
                     </CardLayout>
+                    <div className="p-2 flex flex-row mb-2 items-center">
+                            <div ><h3>Boards</h3></div>
+                            {!viewOnly && <div className="ml-2"> <Button title="New board" primary icon="add" handleOnClick={() => this.openBoardModal()} />
+                            </div>}
+                    </div>
+                    <CardLayout>
+                        <div >
+                            {(this.props.kanbanBoards.length > 0) ?
+
+                                <div className="flex flex-col  max-w-lg  " >
+                                    <div className="p-2  ">
+                                        {this.props.kanbanBoards.length}  board(s)
+                                    </div>
+
+                                    <div >
+                                        {
+                                            this.props.kanbanBoards.map(x =>
+                                                (<div className=" p-2" key={x.id}>
+                                                    <div className="mb-1">
+                                                        <b><Link className="" to={this.props.location.pathname + "/kanban/" + x.id}>{x.title} </Link></b>
+                                                    </div>
+                                                    <div className="text-xs">Created <TimeAgo date={x.createdAt} /> by {x.createdByName}</div>
+                                                </div>)
+                                            )
+                                        }
+                                    </div>
+                                </div>
+                                : "No boards"
+                            }
+                        </div>
+                    </CardLayout>
+
                 </div>
             </div>
         )

@@ -34,6 +34,7 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 		Workspaces    []*Workspace    `json:"workspaces"`
 		Memberships   []*Member       `json:"memberships"`
 		Subscriptions []*Subscription `json:"subscriptions"`
+		ZillaBaseLink string          `json:"zillaBaseLink"`
 	}
 
 	s := GetEnv(r).Service
@@ -48,6 +49,7 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 		Workspaces:    s.GetWorkspaces(),
 		Memberships:   s.GetMembersByAccount(),
 		Subscriptions: s.GetSubscriptionsByAccount(),
+		ZillaBaseLink: s.GetConfig().ZillaBaseLink,
 	})
 }
 

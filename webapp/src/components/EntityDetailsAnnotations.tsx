@@ -175,6 +175,9 @@ class EntityDetailsAnnotations extends Component<Props, State> {
                 }
                 break;
             }
+            case "kanbanboard": {
+                
+            }
 
         }
 

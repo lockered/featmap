@@ -4,5 +4,6 @@ import {CardStatus} from "../../core/misc";
 export interface IWorkflow extends ICard {
     kind: "workflow"
     projectId: string
-    status: CardStatus
+    status: CardStatus,
+    ticketnumber: string
 }
